@@ -62,11 +62,13 @@ public class App {
     }
 
     static private final long CHECK_PERIOD = 10000;
+    static private final int READ_FACTOR = 1000;
 
     private static void loopBack(TargetDataLine dst, AudioFormat dstFormat, SourceDataLine src, AudioFormat srcFormat) {
         if (dst == null || src == null)
             return;
         int frameSize = dstFormat.getFrameSize();
+        int toRead = frameSize * READ_FACTOR;
         dst.addLineListener(event -> System.out.println("dst: " + event.toString()));
         src.addLineListener(event -> System.out.println("src: " + event.toString()));
         try {
@@ -76,9 +78,9 @@ public class App {
             src.start();
             long startTs = System.currentTimeMillis();
             while (System.currentTimeMillis() - startTs < CHECK_PERIOD) {
-                byte[] data = new byte[frameSize];
+                byte[] data = new byte[toRead];
                 boolean isEmpty = true;
-                int read = dst.read(data, 0, frameSize);
+                int read = dst.read(data, 0, toRead);
                 if (read == 0)
                     continue;
                 for (byte datum : data) {
@@ -89,9 +91,8 @@ public class App {
                 }
                 if (isEmpty)
                     continue;
-                System.out.println("read: " + Arrays.toString(data));
-                src.write(data, 0, frameSize);
-                System.out.println("written");
+                src.write(data, 0, toRead);
+                System.out.println("read and written: " + Arrays.toString(data));
             }
         } catch (Exception e) {
             e.printStackTrace();
