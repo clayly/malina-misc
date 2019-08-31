@@ -4,6 +4,7 @@
 package test.audio;
 
 import javax.sound.sampled.*;
+import java.util.Arrays;
 import java.util.Locale;
 
 public class App {
@@ -39,20 +40,47 @@ public class App {
                         i1, dstLinesInfo[i1].toString()
                 ));
             }
+            TargetDataLine dst = null;
+            SourceDataLine src = null;
             try {
-                AudioSystem.getTargetDataLine(audioFormat(), info);
+                dst = AudioSystem.getTargetDataLine(audioFormat(), info);
                 System.out.println("dstDataLine OK");
             } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
-                AudioSystem.getSourceDataLine(audioFormat(), info);
+                src = AudioSystem.getSourceDataLine(audioFormat(), info);
                 System.out.println("srcDataLine OK");
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            loopBack(dst, src);
         }
         System.out.println();
+    }
+
+    static private final long CHECK_PERIOD = 10000;
+
+    private static void loopBack(TargetDataLine dst, SourceDataLine src) {
+        if (dst == null || src == null)
+            return;
+        try {
+            dst.start();
+            src.start();
+            long startTs = System.currentTimeMillis();
+            while (System.currentTimeMillis() - startTs < CHECK_PERIOD) {
+                byte[] data = new byte[1000];
+                dst.read(data, 0, data.length);
+                System.out.println("read: " + Arrays.toString(data));
+                src.write(data, 0, data.length);
+                System.out.println("written");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            dst.close();
+            src.close();
+        }
     }
 
     private static AudioFormat audioFormat() {
