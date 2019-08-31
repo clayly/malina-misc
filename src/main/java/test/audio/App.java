@@ -42,30 +42,36 @@ public class App {
             }
             TargetDataLine dst = null;
             SourceDataLine src = null;
-            AudioFormat format = audioFormat();
+            AudioFormat dstFormat = audioFormat();
+            AudioFormat srcFormat = audioFormat();
             try {
-                dst = AudioSystem.getTargetDataLine(format, info);
+                dst = AudioSystem.getTargetDataLine(dstFormat, info);
                 System.out.println("dstDataLine OK " + dst.getLineInfo());
             } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
-                src = AudioSystem.getSourceDataLine(format, info);
+                src = AudioSystem.getSourceDataLine(srcFormat, info);
                 System.out.println("srcDataLine OK " + src.getLineInfo());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            loopBack(dst, src, format.getFrameSize());
+            loopBack(dst, dstFormat, src, srcFormat);
         }
         System.out.println();
     }
 
-    static private final long CHECK_PERIOD = 2000;
+    static private final long CHECK_PERIOD = 10000;
 
-    private static void loopBack(TargetDataLine dst, SourceDataLine src, int frameSize) {
+    private static void loopBack(TargetDataLine dst, AudioFormat dstFormat, SourceDataLine src, AudioFormat srcFormat) {
         if (dst == null || src == null)
             return;
+        int frameSize = dstFormat.getFrameSize();
+        dst.addLineListener(event -> System.out.println("dst: " + event.toString()));
+        src.addLineListener(event -> System.out.println("src: " + event.toString()));
         try {
+            dst.open(dstFormat);
+            src.open(srcFormat);
             dst.start();
             src.start();
             long startTs = System.currentTimeMillis();
