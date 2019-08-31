@@ -10,13 +10,12 @@ import java.util.Locale;
 public class App {
 
     public static void main(String[] args) {
-        Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();    //get available mixers
-        System.out.println("Available mixers:");
+        Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
         for (int i = 0; i < mixerInfo.length; ++i) {
             Mixer.Info info = mixerInfo[i];
             System.out.println();
             System.out.println(String.format(Locale.US,
-                    "mixerInfo num: %02d \ndescr: <%s> \nname: <%s> \nvend: <%s> \nver: <%s>",
+                    "====== MIXER INFO num: %02d ====== \ndescr: <%s> \nname: <%s> \nvend: <%s> \nver: <%s>",
                     i,
                     info.getDescription(),
                     info.getName(),
@@ -57,8 +56,8 @@ public class App {
                 e.printStackTrace();
             }
             loopBack(dst, dstFormat, src, srcFormat);
+            System.out.println("\n\n");
         }
-        System.out.println();
     }
 
     static private final long CHECK_PERIOD = 10000;
