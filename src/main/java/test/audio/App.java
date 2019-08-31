@@ -45,13 +45,13 @@ public class App {
             AudioFormat format = audioFormat();
             try {
                 dst = AudioSystem.getTargetDataLine(format, info);
-                System.out.println("dstDataLine OK");
+                System.out.println("dstDataLine OK " + dst.getLineInfo());
             } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
                 src = AudioSystem.getSourceDataLine(format, info);
-                System.out.println("srcDataLine OK");
+                System.out.println("srcDataLine OK " + src.getLineInfo());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -72,7 +72,9 @@ public class App {
             while (System.currentTimeMillis() - startTs < CHECK_PERIOD) {
                 byte[] data = new byte[frameSize];
                 boolean isEmpty = true;
-                dst.read(data, 0, frameSize);
+                int read = dst.read(data, 0, frameSize);
+                if (read == 0)
+                    continue;
                 for (byte datum : data) {
                     if (datum != 0) {
                         isEmpty = false;
