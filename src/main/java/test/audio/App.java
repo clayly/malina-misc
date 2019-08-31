@@ -42,26 +42,27 @@ public class App {
             }
             TargetDataLine dst = null;
             SourceDataLine src = null;
+            AudioFormat format = audioFormat();
             try {
-                dst = AudioSystem.getTargetDataLine(audioFormat(), info);
+                dst = AudioSystem.getTargetDataLine(format, info);
                 System.out.println("dstDataLine OK");
             } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
-                src = AudioSystem.getSourceDataLine(audioFormat(), info);
+                src = AudioSystem.getSourceDataLine(format, info);
                 System.out.println("srcDataLine OK");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            loopBack(dst, src);
+            loopBack(dst, src, format.getFrameSize());
         }
         System.out.println();
     }
 
-    static private final long CHECK_PERIOD = 10000;
+    static private final long CHECK_PERIOD = 2000;
 
-    private static void loopBack(TargetDataLine dst, SourceDataLine src) {
+    private static void loopBack(TargetDataLine dst, SourceDataLine src, int frameSize) {
         if (dst == null || src == null)
             return;
         try {
@@ -69,10 +70,19 @@ public class App {
             src.start();
             long startTs = System.currentTimeMillis();
             while (System.currentTimeMillis() - startTs < CHECK_PERIOD) {
-                byte[] data = new byte[1000];
-                dst.read(data, 0, data.length);
+                byte[] data = new byte[frameSize];
+                boolean isEmpty = true;
+                dst.read(data, 0, frameSize);
+                for (byte datum : data) {
+                    if (datum != 0) {
+                        isEmpty = false;
+                        break;
+                    }
+                }
+                if (isEmpty)
+                    continue;
                 System.out.println("read: " + Arrays.toString(data));
-                src.write(data, 0, data.length);
+                src.write(data, 0, frameSize);
                 System.out.println("written");
             }
         } catch (Exception e) {
