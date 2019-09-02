@@ -7,6 +7,7 @@ import javax.sound.sampled.*;
 import java.util.Arrays;
 import java.util.Locale;
 
+@SuppressWarnings({"ConstantConditions", "UnnecessaryLocalVariable"})
 public class App {
 
     public static void main(String[] args) {
@@ -41,8 +42,8 @@ public class App {
             }
             TargetDataLine dst = null;
             SourceDataLine src = null;
-            AudioFormat dstFormat = audioFormat();
-            AudioFormat srcFormat = audioFormat();
+            AudioFormat dstFormat = originFormat();
+            AudioFormat srcFormat = originFormat();
             try {
                 dst = AudioSystem.getTargetDataLine(dstFormat, info);
                 System.out.println("dstDataLine OK " + dst.getLineInfo());
@@ -104,13 +105,23 @@ public class App {
         }
     }
 
-    private static AudioFormat audioFormat() {
+    private static AudioFormat originFormat() {
         float sampleRate = 32000.0F;
-        int sampleSizeInBits = 16;
+        float frameRate = sampleRate;
+        int sampleSize = 16;
         int channels = 2;
-        boolean signed = true;
-        boolean bigEndian = false;
-        return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
+        int frameSize = sampleSize * channels;
+//        boolean isSigned = true;
+        boolean isBigEndian = false;
+        return new AudioFormat(
+                AudioFormat.Encoding.PCM_SIGNED,
+                sampleRate,
+                sampleSize,
+                channels,
+                frameSize,
+                frameRate,
+                isBigEndian);
+//         return new AudioFormat(sampleRate, sampleSize, channels, isSigned, isBigEndian);
     }
 
 }
