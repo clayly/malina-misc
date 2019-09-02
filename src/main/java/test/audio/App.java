@@ -105,7 +105,7 @@ public class App {
     }
 
     private static AudioFormat audioFormat() {
-        float sampleRate = 32000.0F;
+        float sampleRate = 8000.0F;
         int sampleSizeInBits = 16;
         int channels = 2;
         boolean signed = true;
