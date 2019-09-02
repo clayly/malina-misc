@@ -7,10 +7,18 @@ import javax.sound.sampled.*;
 import java.util.Arrays;
 import java.util.Locale;
 
-@SuppressWarnings({"ConstantConditions", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"ConstantConditions", "UnnecessaryLocalVariable", "SpellCheckingInspection"})
 public class App {
 
     public static void main(String[] args) {
+        AudioFormat systemFormat = systemFormat();
+        AudioFormat linphoneFormat = linphoneFormat();
+        System.out.println("systemFormat: " + systemFormat);
+        System.out.println("linphoneFormat: " + linphoneFormat);
+        System.out.println("isConversionSupported: " +
+                AudioSystem.isConversionSupported(AudioFormat.Encoding.ULAW, systemFormat));
+        System.out.println("isConversionSupported: " +
+                AudioSystem.isConversionSupported(linphoneFormat, systemFormat));
         Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
         for (int i = 0; i < mixerInfo.length; ++i) {
             Mixer.Info info = mixerInfo[i];
@@ -42,8 +50,8 @@ public class App {
             }
             TargetDataLine dst = null;
             SourceDataLine src = null;
-            AudioFormat dstFormat = originFormat();
-            AudioFormat srcFormat = originFormat();
+            AudioFormat dstFormat = systemFormat();
+            AudioFormat srcFormat = systemFormat();
             try {
                 dst = AudioSystem.getTargetDataLine(dstFormat, info);
                 System.out.println("dstDataLine OK " + dst.getLineInfo());
@@ -61,7 +69,7 @@ public class App {
         }
     }
 
-    static private final long CHECK_PERIOD = 10000;
+    static private final long CHECK_PERIOD = 1000;
     static private final int READ_FACTOR = 4000;
     static private final int READ_SLICE = 30;
 
@@ -73,6 +81,9 @@ public class App {
         dst.addLineListener(event -> System.out.println("dst: " + event.toString()));
         src.addLineListener(event -> System.out.println("src: " + event.toString()));
         try {
+            AudioInputStream dstStr = new AudioInputStream(dst);
+            AudioInputStream srcStr = AudioSystem.getAudioInputStream(AudioFormat.Encoding.ULAW, dstStr);
+            System.out.println("converted frameLength: " + srcStr.getFrameLength() + " format: " + srcStr.getFormat());
             dst.open(dstFormat);
             src.open(srcFormat);
             dst.start();
@@ -105,13 +116,12 @@ public class App {
         }
     }
 
-    private static AudioFormat originFormat() {
+    static private AudioFormat systemFormat() {
         float sampleRate = 32000.0F;
         float frameRate = sampleRate;
         int sampleSize = 16;
         int channels = 2;
         int frameSize = sampleSize * channels;
-//        boolean isSigned = true;
         boolean isBigEndian = false;
         return new AudioFormat(
                 AudioFormat.Encoding.PCM_SIGNED,
@@ -121,7 +131,23 @@ public class App {
                 frameSize,
                 frameRate,
                 isBigEndian);
-//         return new AudioFormat(sampleRate, sampleSize, channels, isSigned, isBigEndian);
+    }
+
+    static private AudioFormat linphoneFormat() {
+        float sampleRate = 8000.0F;
+        float frameRate = sampleRate;
+        int sampleSize = 8;
+        int channels = 1;
+        int frameSize = sampleSize * channels;
+        boolean isBigEndian = false;
+        return new AudioFormat(
+                AudioFormat.Encoding.ULAW,
+                sampleRate,
+                sampleSize,
+                channels,
+                frameSize,
+                frameRate,
+                isBigEndian);
     }
 
 }
