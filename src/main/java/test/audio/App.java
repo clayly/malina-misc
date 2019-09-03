@@ -12,13 +12,15 @@ public class App {
 
     public static void main(String[] args) {
         AudioFormat systemFormat = systemFormat();
+        AudioFormat mediumFormat = mediumFormat();
         AudioFormat linphoneFormat = linphoneFormat();
         System.out.println("systemFormat: " + systemFormat);
+        System.out.println("mediumFormat: " + mediumFormat);
         System.out.println("linphoneFormat: " + linphoneFormat);
-        System.out.println("isConversionSupported: " +
-                AudioSystem.isConversionSupported(AudioFormat.Encoding.ULAW, systemFormat));
-        System.out.println("isConversionSupported: " +
-                AudioSystem.isConversionSupported(linphoneFormat, systemFormat));
+        System.out.println("isConversionSupported system to medium: " +
+                AudioSystem.isConversionSupported(systemFormat, mediumFormat));
+        System.out.println("isConversionSupported medium to linphone: " +
+                AudioSystem.isConversionSupported(mediumFormat, linphoneFormat));
         Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
         for (int i = 0; i < mixerInfo.length; ++i) {
             Mixer.Info info = mixerInfo[i];
@@ -72,6 +74,7 @@ public class App {
     static private final long CHECK_PERIOD = 1000;
     static private final int READ_FACTOR = 4000;
     static private final int READ_SLICE = 30;
+    static private final int BITS_PER_BYTE = 8;
 
     private static void loopBack(TargetDataLine dst, AudioFormat dstFormat, SourceDataLine src, AudioFormat srcFormat) {
         if (dst == null || src == null)
@@ -117,14 +120,32 @@ public class App {
     }
 
     static private AudioFormat systemFormat() {
+        return linphoneFormat();
+//        float sampleRate = 32000.0F;
+//        float frameRate = sampleRate;
+//        int sampleSize = 16;
+//        int channels = 2;
+//        int frameSize = (sampleSize * channels) / BITS_PER_BYTE;
+//        boolean isBigEndian = false;
+//        return new AudioFormat(
+//                AudioFormat.Encoding.PCM_SIGNED,
+//                sampleRate,
+//                sampleSize,
+//                channels,
+//                frameSize,
+//                frameRate,
+//                isBigEndian);
+    }
+
+    static private AudioFormat mediumFormat() {
         float sampleRate = 32000.0F;
         float frameRate = sampleRate;
-        int sampleSize = 16;
+        int sampleSize = 8;
         int channels = 2;
-        int frameSize = sampleSize * channels;
+        int frameSize = (sampleSize * channels) / BITS_PER_BYTE;
         boolean isBigEndian = false;
         return new AudioFormat(
-                AudioFormat.Encoding.PCM_SIGNED,
+                AudioFormat.Encoding.ULAW,
                 sampleRate,
                 sampleSize,
                 channels,
@@ -138,7 +159,7 @@ public class App {
         float frameRate = sampleRate;
         int sampleSize = 8;
         int channels = 1;
-        int frameSize = sampleSize * channels;
+        int frameSize = (sampleSize * channels) / BITS_PER_BYTE;
         boolean isBigEndian = false;
         return new AudioFormat(
                 AudioFormat.Encoding.ULAW,
