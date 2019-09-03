@@ -55,13 +55,13 @@ public final class App {
 
     static public void main(String[] args) {
         try {
-            System.out.println("ENVIRONMENT");
+            System.out.println("\n========= ENVIRONMENT =========\n");
             System.getenv().forEach((key, value) -> {
                         try { print(key + ":" + value); }
                         catch (Exception e) { e.printStackTrace(); }
                     }
             );
-            System.out.println("PROPERTY");
+            System.out.println("\n========= PROPERTY =========\n");
             System.getProperties().forEach((key, value) -> {
                         try { print(key + ":" + value); }
                         catch (Exception e) { e.printStackTrace(); }
