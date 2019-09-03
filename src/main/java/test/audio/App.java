@@ -10,7 +10,7 @@ import java.util.Locale;
 public final class App {
 
     static public final String ZVA_LOG = "ZVA_LOG";
-    static public boolean LOG = true;
+    static public boolean LOG = false;
 
     static public final String ZVA_LOOPBACK_TEST = "ZVA_LOOPBACK_TEST";
     static public boolean LOOPBACK_TEST = false;
