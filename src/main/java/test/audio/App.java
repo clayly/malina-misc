@@ -63,11 +63,11 @@ public final class App {
     }
 
     static private void setup() {
-        try { if (System.getenv(ZVA_LOG) != null) LOG = true; }
+        try { if (System.getProperty(ZVA_LOG) != null) LOG = true; }
         catch (Exception e) { e.printStackTrace(); }
-        try { if (System.getenv(ZVA_LOOPBACK_TEST) != null) LOOPBACK_TEST = true; }
+        try { if (System.getProperty(ZVA_LOOPBACK_TEST) != null) LOOPBACK_TEST = true; }
         catch (Exception e) { e.printStackTrace(); }
-        try { if (System.getenv(ZVA_FORMAT_TEST) != null) FORMAT_TEST = true; }
+        try { if (System.getProperty(ZVA_FORMAT_TEST) != null) FORMAT_TEST = true; }
         catch (Exception e) { e.printStackTrace(); }
     }
 
