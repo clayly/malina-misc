@@ -9,18 +9,17 @@ import java.util.Locale;
 @SuppressWarnings({"ConstantConditions", "UnnecessaryLocalVariable", "SpellCheckingInspection", "WeakerAccess"})
 public final class App {
 
-    static public final String ZVA_LOG = "ZVA_LOG";
-    static public boolean LOG = false;
-
+    static public final String ZVA_LOG           = "ZVA_LOG";
     static public final String ZVA_LOOPBACK_TEST = "ZVA_LOOPBACK_TEST";
-    static public boolean LOOPBACK_TEST = false;
+    static public final String ZVA_FORMAT_TEST   = "ZVA_FORMAT_TEST";
 
-    static public final String ZVA_FORMAT_TEST = "ZVA_FORMAT_TEST";
-    static public boolean FORMAT_TEST = false;
+    static public boolean LOG           = false;
+    static public boolean LOOPBACK_TEST = false;
+    static public boolean FORMAT_TEST   = false;
 
     static private final long CHECK_PERIOD = 5000;
-    static private final int READ_FACTOR = 4000;
-    static private final int READ_SLICE = 30;
+    static private final int READ_FACTOR   = 4000;
+    static private final int READ_SLICE    = 30;
     static private final int BITS_PER_BYTE = 8;
 
     static private final AudioFormat.Encoding[] ENCODING = new AudioFormat.Encoding[]{
@@ -29,10 +28,11 @@ public final class App {
             AudioFormat.Encoding.PCM_SIGNED,
             AudioFormat.Encoding.PCM_UNSIGNED,
             AudioFormat.Encoding.ULAW};
-    static private final float[] SAMPLE_RATE = new float[]{8000, 16000, 32000};
-    static private final int[] SAMPLE_SIZE = new int[]{8, 16, 32};
-    static private final int[] CHANNELS = new int[]{1, 2};
-    static private final boolean[] BIG_ENDIAN = new boolean[]{true, false};
+
+    static private final float  [] SAMPLE_RATE = new float  []{8000, 16000, 32000};
+    static private final int    [] SAMPLE_SIZE = new int    []{8, 16, 32};
+    static private final int    [] CHANNELS    = new int    []{1, 2};
+    static private final boolean[] BIG_ENDIAN  = new boolean[]{true, false};
 
     static private void log(String format, Object... args) {
         if (LOG) System.out.println(String.format(Locale.US, format, args));
@@ -54,6 +54,10 @@ public final class App {
     }
 
     static public void main(String[] args) {
+        System.out.println("ENVIRONMENT");
+        System.getenv().forEach((key, value) -> print(key + ":" + value));
+        System.out.println("PROPERTY");
+        System.getProperties().forEach((key, value) -> print(key + ":" + value));
         setup();
         trash();
         if (FORMAT_TEST)
@@ -87,8 +91,8 @@ public final class App {
             return;
         int frameSize = dstFormat.getFrameSize();
         int toRead = frameSize * READ_FACTOR;
-        dst.addLineListener(event -> log("dst: " + event.toString()));
-        src.addLineListener(event -> log("src: " + event.toString()));
+        dst.addLineListener(event -> print("dst: " + event.toString()));
+        src.addLineListener(event -> print("src: " + event.toString()));
         try {
             dst.open(dstFormat);
             src.open(srcFormat);
@@ -112,10 +116,10 @@ public final class App {
                 src.write(readData, 0, toRead);
                 byte[] readSlice = new byte[READ_SLICE];
                 System.arraycopy(readData, 0, readSlice, 0, readSlice.length);
-                log("read and written: " + readData.length + " slice: " + Arrays.toString(readSlice));
+                print("read and written: " + readData.length + " slice: " + Arrays.toString(readSlice));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            print(e.getMessage());
         } finally {
             dst.close();
             src.close();
@@ -126,35 +130,34 @@ public final class App {
         Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
         for (int i = 0; i < mixerInfo.length; ++i) {
             Mixer.Info info = mixerInfo[i];
-            log("");
             print(i, info);
             Mixer mixer = AudioSystem.getMixer(info);
             Line.Info[] srcLinesInfo = mixer.getSourceLineInfo();
-            log("srcLinesInfo cnt: " + srcLinesInfo.length);
+            print("srcLinesInfo cnt: " + srcLinesInfo.length);
             for (int i1 = 0; i1 < srcLinesInfo.length; i1++)
-                log("srcLineInfo num: %02d srcLineInfo: <%s>", i1, srcLinesInfo[i1]);
+                print("srcLineInfo num: %02d srcLineInfo: <%s>", i1, srcLinesInfo[i1]);
             Line.Info[] dstLinesInfo = mixer.getTargetLineInfo();
-            log("dstLinesInfo cnt: " + dstLinesInfo.length);
+            print("dstLinesInfo cnt: " + dstLinesInfo.length);
             for (int i1 = 0; i1 < dstLinesInfo.length; i1++)
-                log("dstLineInfo num: %02d dstLineInfo: <%s>", i1, dstLinesInfo[i1]);
+                print("dstLineInfo num: %02d dstLineInfo: <%s>", i1, dstLinesInfo[i1]);
             TargetDataLine dst = null;
             SourceDataLine src = null;
             AudioFormat dstFormat = linphoneFormat();
             AudioFormat srcFormat = linphoneFormat();
             try {
                 dst = AudioSystem.getTargetDataLine(dstFormat, info);
-                log("dstDataLine OK " + dst.getLineInfo());
+                print("dstDataLine OK " + dst.getLineInfo());
             } catch (Exception e) {
-                e.printStackTrace();
+                print(e.getMessage());
             }
             try {
                 src = AudioSystem.getSourceDataLine(srcFormat, info);
-                log("srcDataLine OK " + src.getLineInfo());
+                print("srcDataLine OK " + src.getLineInfo());
             } catch (Exception e) {
-                e.printStackTrace();
+                print(e.getMessage());
             }
             loopBack(dst, dstFormat, src, srcFormat);
-            log("");
+            print("");
         }
     }
 
