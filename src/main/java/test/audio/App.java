@@ -119,6 +119,12 @@ public class App {
         }
     }
 
+    static private final AudioFormat.Encoding[] ENCODING = new AudioFormat.Encoding[]{
+            AudioFormat.Encoding.ALAW,
+            AudioFormat.Encoding.PCM_FLOAT,
+            AudioFormat.Encoding.PCM_SIGNED,
+            AudioFormat.Encoding.PCM_UNSIGNED,
+            AudioFormat.Encoding.ULAW};
     static private final float[] SAMPLE_RATE = new float[]{8000, 16000, 32000};
     static private final int[] SAMPLE_SIZE = new int[]{8, 16, 32};
     static private final int[] CHANNELS = new int[]{1, 2};
@@ -134,27 +140,38 @@ public class App {
                     info.getVersion()
             ));
             for (AudioFormat format : allFormats()) {
-                System.out.println("check format: " + format);
+//                System.out.println("check format: " + format);
+                boolean isDstOk = false;
                 try {
                     TargetDataLine dst = AudioSystem.getTargetDataLine(format, info);
-                    System.out.println("OK dstDataLine getTargetDataLine lineInfo: " + dst.getLineInfo());
-                    dst.addLineListener(event -> System.out.println("dstDataLine event: " + event));
+//                    System.out.println("OK dstDataLine getTargetDataLine lineInfo: " + dst.getLineInfo());
+//                    dst.addLineListener(event -> System.out.println("dstDataLine event: " + event));
                     dst.open(format);
-                    System.out.println("OK dstDataLine open");
+//                    System.out.println("OK dstDataLine open");
+                    isDstOk = true;
                     dst.close();
                 } catch (Exception e) {
-                    System.out.println("FAIL dstDataLine exception: " + e.getMessage());
+//                    System.out.println("FAIL dstDataLine exception: " + e.getMessage());
                 }
+                boolean isSrcOk = false;
                 try {
                     SourceDataLine src = AudioSystem.getSourceDataLine(format, info);
-                    System.out.println("OK srcDataLine getSourceDataLine lineInfo: " + src.getLineInfo());
-                    src.addLineListener(event -> System.out.println("srcDataLine event: " + event));
+//                    System.out.println("OK srcDataLine getSourceDataLine lineInfo: " + src.getLineInfo());
+//                    src.addLineListener(event -> System.out.println("srcDataLine event: " + event));
                     src.open(format);
-                    System.out.println("OK srcDataLine open");
+//                    System.out.println("OK srcDataLine open");
+                    isSrcOk = true;
                     src.close();
                 } catch (Exception e) {
-                    System.out.println("FAIL srcDataLine exception: " + e.getMessage());
+//                    System.out.println("FAIL srcDataLine exception: " + e.getMessage());
                 }
+                if (!isDstOk && !isSrcOk)
+                    continue;
+                System.out.println("format: " + format);
+                if (isDstOk)
+                    System.out.println("OK dst");
+                if (isSrcOk)
+                    System.out.println("OK src");
                 System.out.println();
             }
         }
@@ -162,14 +179,16 @@ public class App {
 
     static private List<AudioFormat> allFormats() {
         List<AudioFormat> allFormats = new ArrayList<>();
-        for (float sr : SAMPLE_RATE) {
-            for (int ss : SAMPLE_SIZE) {
-                for (int c : CHANNELS) {
-                    for (boolean b : BIG_ENDIAN) {
-                        try {
-                            allFormats.add(constructFormat(sr, ss, c, b));
-                        } catch (Exception e) {
-                            e.printStackTrace();
+        for (AudioFormat.Encoding en : ENCODING) {
+            for (float sr : SAMPLE_RATE) {
+                for (int ss : SAMPLE_SIZE) {
+                    for (int c : CHANNELS) {
+                        for (boolean b : BIG_ENDIAN) {
+                            try {
+                                allFormats.add(constructFormat(en, sr, ss, c, b));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }
@@ -178,11 +197,11 @@ public class App {
         return allFormats;
     }
 
-    static private AudioFormat constructFormat(float sampleRate, int sampleSize, int channels, boolean isBigEndian) {
+    static private AudioFormat constructFormat(AudioFormat.Encoding encoding, float sampleRate, int sampleSize, int channels, boolean isBigEndian) {
         float frameRate = sampleRate;
         int frameSize = (sampleSize * channels) / BITS_PER_BYTE;
         return new AudioFormat(
-                AudioFormat.Encoding.PCM_SIGNED,
+                encoding,
                 sampleRate,
                 sampleSize,
                 channels,
