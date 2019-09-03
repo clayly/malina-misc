@@ -132,6 +132,7 @@ public final class App {
 
     static private void loopbackTest() {
         printChapter("LOOPBACK TEST");
+        print("format: " + linphoneFormat() + "\n");
         Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
         for (int i = 0; i < mixerInfo.length; ++i) {
             Mixer.Info info = mixerInfo[i];
