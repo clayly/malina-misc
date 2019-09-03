@@ -54,10 +54,14 @@ public final class App {
     }
 
     static public void main(String[] args) {
-        System.out.println("ENVIRONMENT");
-        System.getenv().forEach((key, value) -> print(key + ":" + value));
-        System.out.println("PROPERTY");
-        System.getProperties().forEach((key, value) -> print(key + ":" + value));
+        try {
+            System.out.println("ENVIRONMENT");
+            System.getenv().forEach((key, value) -> print(key + ":" + value));
+            System.out.println("PROPERTY");
+            System.getProperties().forEach((key, value) -> print(key + ":" + value));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setup();
         trash();
         if (FORMAT_TEST)
