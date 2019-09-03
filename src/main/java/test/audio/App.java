@@ -271,12 +271,12 @@ public final class App {
         }
     }
 
-    static private void print(String format, Object... args) {
-        System.out.println(String.format(Locale.US, format, args));
+    static private void print(String msg, Object... args) {
+        System.out.println(String.format(Locale.US, msg == null ? "<null>" : msg, args));
     }
 
-    static private void log(String format, Object... args) {
-        if (LOG) print(format, args);
+    static private void log(String msg, Object... args) {
+        if (LOG) print(msg, args);
     }
 
     static private void printChapter(String name) {
