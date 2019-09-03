@@ -170,12 +170,9 @@ public class App {
                 }
                 if (!isDstOk && !isSrcOk)
                     continue;
-                System.out.println("format: " + format);
-                if (isDstOk)
-                    System.out.println("OK dst");
-                if (isSrcOk)
-                    System.out.println("OK src");
-                System.out.println();
+                String dstStatus = isDstOk ? "OK" : "BAD";
+                String srcStatus = isSrcOk ? "OK" : "BAD";
+                System.out.println("dst " + dstStatus + " src " + srcStatus + " format: " + format);
             }
         }
     }
