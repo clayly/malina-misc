@@ -1,71 +1,74 @@
 package test.audio;
 
 import javax.sound.sampled.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 @SuppressWarnings({"ConstantConditions", "UnnecessaryLocalVariable", "SpellCheckingInspection"})
 public class App {
 
     public static void main(String[] args) {
-        AudioFormat systemFormat = systemFormat();
-        AudioFormat mediumFormat = mediumFormat();
-        AudioFormat linphoneFormat = linphoneFormat();
-        System.out.println("systemFormat: " + systemFormat);
-        System.out.println("mediumFormat: " + mediumFormat);
-        System.out.println("linphoneFormat: " + linphoneFormat);
-        System.out.println("isConversionSupported system to medium: " +
-                AudioSystem.isConversionSupported(systemFormat, mediumFormat));
-        System.out.println("isConversionSupported medium to linphone: " +
-                AudioSystem.isConversionSupported(mediumFormat, linphoneFormat));
-        Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
-        for (int i = 0; i < mixerInfo.length; ++i) {
-            Mixer.Info info = mixerInfo[i];
-            System.out.println();
-            System.out.println(String.format(Locale.US,
-                    "====== MIXER INFO num: %02d ====== \ndescr: <%s> \nname: <%s> \nvend: <%s> \nver: <%s>",
-                    i,
-                    info.getDescription(),
-                    info.getName(),
-                    info.getVendor(),
-                    info.getVersion()
-            ));
-            Mixer mixer = AudioSystem.getMixer(info);
-            Line.Info[] srcLinesInfo = mixer.getSourceLineInfo();
-            System.out.println("srcLinesInfo cnt: " + srcLinesInfo.length);
-            for (int i1 = 0; i1 < srcLinesInfo.length; i1++) {
-                System.out.println(String.format(Locale.US,
-                        "srcLineInfo num: %02d srcLineInfo: <%s>",
-                        i1, srcLinesInfo[i1].toString()
-                ));
-            }
-            Line.Info[] dstLinesInfo = mixer.getTargetLineInfo();
-            System.out.println("dstLinesInfo cnt: " + dstLinesInfo.length);
-            for (int i1 = 0; i1 < dstLinesInfo.length; i1++) {
-                System.out.println(String.format(Locale.US,
-                        "dstLineInfo num: %02d dstLineInfo: <%s>",
-                        i1, dstLinesInfo[i1].toString()
-                ));
-            }
-            TargetDataLine dst = null;
-            SourceDataLine src = null;
-            AudioFormat dstFormat = linphoneFormat();
-            AudioFormat srcFormat = linphoneFormat();
-            try {
-                dst = AudioSystem.getTargetDataLine(dstFormat, info);
-                System.out.println("dstDataLine OK " + dst.getLineInfo());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                src = AudioSystem.getSourceDataLine(srcFormat, info);
-                System.out.println("srcDataLine OK " + src.getLineInfo());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            loopBack(dst, dstFormat, src, srcFormat);
-            System.out.println("\n\n");
-        }
+        testFormats();
+//        AudioFormat systemFormat = systemFormat();
+//        AudioFormat mediumFormat = mediumFormat();
+//        AudioFormat linphoneFormat = linphoneFormat();
+//        System.out.println("systemFormat: " + systemFormat);
+//        System.out.println("mediumFormat: " + mediumFormat);
+//        System.out.println("linphoneFormat: " + linphoneFormat);
+//        System.out.println("isConversionSupported system to medium: " +
+//                AudioSystem.isConversionSupported(systemFormat, mediumFormat));
+//        System.out.println("isConversionSupported medium to linphone: " +
+//                AudioSystem.isConversionSupported(mediumFormat, linphoneFormat));
+//        Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
+//        for (int i = 0; i < mixerInfo.length; ++i) {
+//            Mixer.Info info = mixerInfo[i];
+//            System.out.println();
+//            System.out.println(String.format(Locale.US,
+//                    "====== MIXER INFO num: %02d ====== \ndescr: <%s> \nname: <%s> \nvend: <%s> \nver: <%s>",
+//                    i,
+//                    info.getDescription(),
+//                    info.getName(),
+//                    info.getVendor(),
+//                    info.getVersion()
+//            ));
+//            Mixer mixer = AudioSystem.getMixer(info);
+//            Line.Info[] srcLinesInfo = mixer.getSourceLineInfo();
+//            System.out.println("srcLinesInfo cnt: " + srcLinesInfo.length);
+//            for (int i1 = 0; i1 < srcLinesInfo.length; i1++) {
+//                System.out.println(String.format(Locale.US,
+//                        "srcLineInfo num: %02d srcLineInfo: <%s>",
+//                        i1, srcLinesInfo[i1].toString()
+//                ));
+//            }
+//            Line.Info[] dstLinesInfo = mixer.getTargetLineInfo();
+//            System.out.println("dstLinesInfo cnt: " + dstLinesInfo.length);
+//            for (int i1 = 0; i1 < dstLinesInfo.length; i1++) {
+//                System.out.println(String.format(Locale.US,
+//                        "dstLineInfo num: %02d dstLineInfo: <%s>",
+//                        i1, dstLinesInfo[i1].toString()
+//                ));
+//            }
+//            TargetDataLine dst = null;
+//            SourceDataLine src = null;
+//            AudioFormat dstFormat = linphoneFormat();
+//            AudioFormat srcFormat = linphoneFormat();
+//            try {
+//                dst = AudioSystem.getTargetDataLine(dstFormat, info);
+//                System.out.println("dstDataLine OK " + dst.getLineInfo());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            try {
+//                src = AudioSystem.getSourceDataLine(srcFormat, info);
+//                System.out.println("srcDataLine OK " + src.getLineInfo());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            loopBack(dst, dstFormat, src, srcFormat);
+//            System.out.println("\n\n");
+//        }
     }
 
     static private final long CHECK_PERIOD = 5000;
@@ -114,6 +117,78 @@ public class App {
             dst.close();
             src.close();
         }
+    }
+
+    static private final float[] SAMPLE_RATE = new float[]{8000, 16000, 32000};
+    static private final int[] SAMPLE_SIZE = new int[]{8, 16, 32};
+    static private final int[] CHANNELS = new int[]{1, 2};
+    static private final boolean[] BIG_ENDIAN = new boolean[]{true, false};
+
+    static private void testFormats() {
+        for (Mixer.Info info : AudioSystem.getMixerInfo()) {
+            System.out.println(String.format(Locale.US,
+                    "====== MIXER INFO ====== \ndescr: <%s> \nname: <%s> \nvend: <%s> \nver: <%s>",
+                    info.getDescription(),
+                    info.getName(),
+                    info.getVendor(),
+                    info.getVersion()
+            ));
+            for (AudioFormat format : allFormats()) {
+                System.out.println("check format: " + format);
+                try {
+                    TargetDataLine dst = AudioSystem.getTargetDataLine(format, info);
+                    System.out.println("OK dstDataLine getTargetDataLine lineInfo: " + dst.getLineInfo());
+                    dst.addLineListener(event -> System.out.println("dstDataLine event: " + event));
+                    dst.open(format);
+                    System.out.println("OK dstDataLine open");
+                    dst.close();
+                } catch (Exception e) {
+                    System.out.println("FAIL dstDataLine exception: " + e.getMessage());
+                }
+                try {
+                    SourceDataLine src = AudioSystem.getSourceDataLine(format, info);
+                    System.out.println("OK srcDataLine getSourceDataLine lineInfo: " + src.getLineInfo());
+                    src.addLineListener(event -> System.out.println("srcDataLine event: " + event));
+                    src.open(format);
+                    System.out.println("OK srcDataLine open");
+                    src.close();
+                } catch (Exception e) {
+                    System.out.println("FAIL srcDataLine exception: " + e.getMessage());
+                }
+                System.out.println();
+            }
+        }
+    }
+
+    static private List<AudioFormat> allFormats() {
+        List<AudioFormat> allFormats = new ArrayList<>();
+        for (float sr : SAMPLE_RATE) {
+            for (int ss : SAMPLE_SIZE) {
+                for (int c : CHANNELS) {
+                    for (boolean b : BIG_ENDIAN) {
+                        try {
+                            allFormats.add(constructFormat(sr, ss, c, b));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+        return allFormats;
+    }
+
+    static private AudioFormat constructFormat(float sampleRate, int sampleSize, int channels, boolean isBigEndian) {
+        float frameRate = sampleRate;
+        int frameSize = (sampleSize * channels) / BITS_PER_BYTE;
+        return new AudioFormat(
+                AudioFormat.Encoding.PCM_SIGNED,
+                sampleRate,
+                sampleSize,
+                channels,
+                frameSize,
+                frameRate,
+                isBigEndian);
     }
 
     static private AudioFormat systemFormat() {
