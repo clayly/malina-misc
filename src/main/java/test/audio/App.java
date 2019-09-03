@@ -131,9 +131,12 @@ public class App {
     static private final boolean[] BIG_ENDIAN = new boolean[]{true, false};
 
     static private void testFormats() {
-        for (Mixer.Info info : AudioSystem.getMixerInfo()) {
+        Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
+        for (int i = 0; i < mixerInfo.length; ++i) {
+            Mixer.Info info = mixerInfo[i];
             System.out.println(String.format(Locale.US,
-                    "====== MIXER INFO ====== \ndescr: <%s> \nname: <%s> \nvend: <%s> \nver: <%s>",
+                    "====== MIXER INFO num: %02d ====== \ndescr: <%s> \nname: <%s> \nvend: <%s> \nver: <%s>",
+                    i,
                     info.getDescription(),
                     info.getName(),
                     info.getVendor(),
