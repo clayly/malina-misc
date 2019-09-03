@@ -204,6 +204,7 @@ public final class App {
                 String srcStatus = isSrcOk ? "OK" : "BAD";
                 print("dst " + dstStatus + " src " + srcStatus + " format: " + format);
             }
+            print("");
         }
     }
 
