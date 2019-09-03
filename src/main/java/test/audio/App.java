@@ -84,9 +84,9 @@ public class App {
         dst.addLineListener(event -> System.out.println("dst: " + event.toString()));
         src.addLineListener(event -> System.out.println("src: " + event.toString()));
         try {
-            AudioInputStream dstStr = new AudioInputStream(dst);
-            AudioInputStream srcStr = AudioSystem.getAudioInputStream(AudioFormat.Encoding.ULAW, dstStr);
-            System.out.println("converted frameLength: " + srcStr.getFrameLength() + " format: " + srcStr.getFormat());
+//            AudioInputStream dstStr = new AudioInputStream(dst);
+//            AudioInputStream srcStr = AudioSystem.getAudioInputStream(AudioFormat.Encoding.ULAW, dstStr);
+//            System.out.println("converted frameLength: " + srcStr.getFrameLength() + " format: " + srcStr.getFormat());
             dst.open(dstFormat);
             src.open(srcFormat);
             dst.start();
