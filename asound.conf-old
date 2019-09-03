@@ -1,0 +1,12 @@
+cm.!default {
+type plug
+slave {
+pcm "hw:2,0"
+}
+}
+
+ctl.!default {
+type hw
+card 2
+}
+

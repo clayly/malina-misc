@@ -1,0 +1,25 @@
+pcm.zva_plugin {
+        type plug
+        slave {
+               pcm "hw:2,0"
+        }
+}
+
+
+pcm.!default {
+        type plug
+        slave {
+                pcm "zva_plugin"
+                format MU_LAW
+                channels 1
+                rate 16000
+        }
+        rate_converter "samplerate"
+}
+
+
+ctl.!default {
+        type hw
+        card 2
+}
+

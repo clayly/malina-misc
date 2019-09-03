@@ -16,7 +16,7 @@ public final class App {
     static public boolean LOOPBACK_TEST = false;
 
     static public final String ZVA_FORMAT_TEST = "ZVA_FORMAT_TEST";
-    static public boolean FORMAT_TEST = true;
+    static public boolean FORMAT_TEST = false;
 
     static private final long CHECK_PERIOD = 5000;
     static private final int READ_FACTOR = 4000;
@@ -54,15 +54,12 @@ public final class App {
     }
 
     static public void main(String[] args) {
-//        setup();
-//        trash();
-//        if (FORMAT_TEST) {
-//            formatTest();
-//        }
-//        if (LOOPBACK_TEST) {
-//            loopbackTest();
-//        }
-        formatTest();
+        setup();
+        trash();
+        if (FORMAT_TEST)
+            formatTest();
+        if (LOOPBACK_TEST)
+            loopbackTest();
     }
 
     static private void setup() {
