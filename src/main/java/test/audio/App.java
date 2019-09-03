@@ -7,11 +7,16 @@ import java.util.List;
 import java.util.Locale;
 
 @SuppressWarnings({"ConstantConditions", "UnnecessaryLocalVariable", "SpellCheckingInspection", "WeakerAccess"})
-public class App {
+public final class App {
 
-    static public final boolean LOG = true;
-    static public final boolean LOOPBACK_TEST = true;
-    static public final boolean FORMAT_TEST = false;
+    static public final String ZVA_LOG = "ZVA_LOG";
+    static public boolean LOG = true;
+
+    static public final String ZVA_LOOPBACK_TEST = "ZVA_LOOPBACK_TEST";
+    static public boolean LOOPBACK_TEST = false;
+
+    static public final String ZVA_FORMAT_TEST = "ZVA_FORMAT_TEST";
+    static public boolean FORMAT_TEST = true;
 
     static private final long CHECK_PERIOD = 5000;
     static private final int READ_FACTOR = 4000;
@@ -49,25 +54,38 @@ public class App {
     }
 
     static public void main(String[] args) {
-        AudioFormat systemFormat = systemFormat();
-        AudioFormat mediumFormat = mediumFormat();
-        AudioFormat linphoneFormat = linphoneFormat();
-        log("systemFormat: " + systemFormat);
-        log("mediumFormat: " + mediumFormat);
-        log("linphoneFormat: " + linphoneFormat);
-        log("isConversionSupported system to medium: " +
-                AudioSystem.isConversionSupported(systemFormat, mediumFormat));
-        log("isConversionSupported medium to linphone: " +
-                AudioSystem.isConversionSupported(mediumFormat, linphoneFormat));
-        if (FORMAT_TEST) {
-            formatTest();
-        }
-        if (LOOPBACK_TEST) {
-            loopbackTest();
-        }
+//        setup();
+//        trash();
+//        if (FORMAT_TEST) {
+//            formatTest();
+//        }
+//        if (LOOPBACK_TEST) {
+//            loopbackTest();
+//        }
+        formatTest();
     }
 
-    private static void loopBack(TargetDataLine dst, AudioFormat dstFormat, SourceDataLine src, AudioFormat srcFormat) {
+    static private void setup() {
+        try { if (System.getenv(ZVA_LOG) != null) LOG = true; }
+        catch (Exception e) { e.printStackTrace(); }
+        try { if (System.getenv(ZVA_LOOPBACK_TEST) != null) LOOPBACK_TEST = true; }
+        catch (Exception e) { e.printStackTrace(); }
+        try { if (System.getenv(ZVA_FORMAT_TEST) != null) FORMAT_TEST = true; }
+        catch (Exception e) { e.printStackTrace(); }
+    }
+
+    static private void trash() {
+        AudioFormat system = systemFormat();
+        AudioFormat medium = mediumFormat();
+        AudioFormat linphone = linphoneFormat();
+        log("system: " + system);
+        log("medium: " + medium);
+        log("linphone: " + linphone);
+        log("isConversable system to medium: " + AudioSystem.isConversionSupported(system, medium));
+        log("isConversable medium to linphone: " + AudioSystem.isConversionSupported(medium, linphone));
+    }
+
+    static private void loopBack(TargetDataLine dst, AudioFormat dstFormat, SourceDataLine src, AudioFormat srcFormat) {
         if (dst == null || src == null)
             return;
         int frameSize = dstFormat.getFrameSize();
@@ -75,9 +93,6 @@ public class App {
         dst.addLineListener(event -> log("dst: " + event.toString()));
         src.addLineListener(event -> log("src: " + event.toString()));
         try {
-//            AudioInputStream dstStr = new AudioInputStream(dst);
-//            AudioInputStream srcStr = AudioSystem.getAudioInputStream(AudioFormat.Encoding.ULAW, dstStr);
-//            System.out.println("converted frameLength: " + srcStr.getFrameLength() + " format: " + srcStr.getFormat());
             dst.open(dstFormat);
             src.open(srcFormat);
             dst.start();
@@ -188,25 +203,22 @@ public class App {
 
     static private List<AudioFormat> allFormats() {
         List<AudioFormat> allFormats = new ArrayList<>();
-        for (AudioFormat.Encoding en : ENCODING) {
-            for (float sr : SAMPLE_RATE) {
-                for (int ss : SAMPLE_SIZE) {
-                    for (int c : CHANNELS) {
-                        for (boolean b : BIG_ENDIAN) {
-                            try {
-                                allFormats.add(constructFormat(en, sr, ss, c, b));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        for (AudioFormat.Encoding en : ENCODING)
+            for (float sr : SAMPLE_RATE)
+                for (int ss : SAMPLE_SIZE)
+                    for (int c : CHANNELS)
+                        for (boolean b : BIG_ENDIAN)
+                            try { allFormats.add(constructFormat(en, sr, ss, c, b)); }
+                            catch (Exception e) { e.printStackTrace(); }
         return allFormats;
     }
 
-    static private AudioFormat constructFormat(AudioFormat.Encoding encoding, float sampleRate, int sampleSize, int channels, boolean isBigEndian) {
+    static private AudioFormat constructFormat(
+            AudioFormat.Encoding encoding,
+            float sampleRate,
+            int sampleSize,
+            int channels,
+            boolean isBigEndian) {
         float frameRate = sampleRate;
         int frameSize = (sampleSize * channels) / BITS_PER_BYTE;
         return new AudioFormat(
@@ -268,6 +280,12 @@ public class App {
                 frameSize,
                 frameRate,
                 isBigEndian);
+    }
+
+    static private void conversion(TargetDataLine dst) {
+        AudioInputStream dstStr = new AudioInputStream(dst);
+        AudioInputStream srcStr = AudioSystem.getAudioInputStream(AudioFormat.Encoding.ULAW, dstStr);
+        System.out.println("converted frameLength: " + srcStr.getFrameLength() + " format: " + srcStr.getFormat());
     }
 
 }
