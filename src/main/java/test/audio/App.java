@@ -13,6 +13,11 @@ public class App {
     static public final boolean LOOPBACK_TEST = true;
     static public final boolean FORMAT_TEST = false;
 
+    static private final long CHECK_PERIOD = 5000;
+    static private final int READ_FACTOR = 4000;
+    static private final int READ_SLICE = 30;
+    static private final int BITS_PER_BYTE = 8;
+
     static private final AudioFormat.Encoding[] ENCODING = new AudioFormat.Encoding[]{
             AudioFormat.Encoding.ALAW,
             AudioFormat.Encoding.PCM_FLOAT,
@@ -61,11 +66,6 @@ public class App {
             loopbackTest();
         }
     }
-
-    static private final long CHECK_PERIOD = 5000;
-    static private final int READ_FACTOR = 4000;
-    static private final int READ_SLICE = 30;
-    static private final int BITS_PER_BYTE = 8;
 
     private static void loopBack(TargetDataLine dst, AudioFormat dstFormat, SourceDataLine src, AudioFormat srcFormat) {
         if (dst == null || src == null)
