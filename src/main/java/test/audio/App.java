@@ -155,7 +155,7 @@ public class App {
     }
 
     static private AudioFormat linphoneFormat() {
-        float sampleRate = 8000.0F;
+        float sampleRate = 16000.0F;
         float frameRate = sampleRate;
         int sampleSize = 8;
         int channels = 1;
