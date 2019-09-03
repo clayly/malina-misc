@@ -6,18 +6,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-@SuppressWarnings({"ConstantConditions", "UnnecessaryLocalVariable", "SpellCheckingInspection", "WeakerAccess"})
+@SuppressWarnings({"ConstantConditions", "UnnecessaryLocalVariable", "SpellCheckingInspection", "SameParameterValue", "ManualMinMaxCalculation"})
 public final class App {
 
-    static public final String ZVA_LOG           = "ZVA_LOG";
-    static public final String ZVA_LOOPBACK_TEST = "ZVA_LOOPBACK_TEST";
-    static public final String ZVA_FORMAT_TEST   = "ZVA_FORMAT_TEST";
+    static private final String ZVA_LOG             = "ZVA_LOG";
+    static private final String ZVA_LOOPBACK_TEST   = "ZVA_LOOPBACK_TEST";
+    static private final String ZVA_LOOPBACK_PERIOD = "ZVA_LOOPBACK_PERIOD";
+    static private final String ZVA_FORMAT_TEST     = "ZVA_FORMAT_TEST";
 
-    static public boolean LOG           = false;
-    static public boolean LOOPBACK_TEST = false;
-    static public boolean FORMAT_TEST   = false;
+    static private boolean LOG             = false;
+    static private boolean LOOPBACK_TEST   = false;
+    static private boolean FORMAT_TEST     = false;
+    static private long    LOOPBACK_PERIOD = 5000;
 
-    static private final long CHECK_PERIOD = 5000;
     static private final int READ_FACTOR   = 4000;
     static private final int READ_SLICE    = 30;
     static private final int BITS_PER_BYTE = 8;
@@ -34,25 +35,6 @@ public final class App {
     static private final int    [] CHANNELS    = new int    []{1, 2};
     static private final boolean[] BIG_ENDIAN  = new boolean[]{true, false};
 
-    static private void log(String format, Object... args) {
-        if (LOG) System.out.println(String.format(Locale.US, format, args));
-    }
-
-    static private void print(String format, Object... args) {
-        System.out.println(String.format(Locale.US, format, args));
-    }
-
-    static private void print(int num, Mixer.Info info) {
-        System.out.println(String.format(Locale.US,
-                "====== MIXER INFO num: %02d ====== \ndescr: <%s> \nname: <%s> \nvend: <%s> \nver: <%s>",
-                num,
-                info.getDescription(),
-                info.getName(),
-                info.getVendor(),
-                info.getVersion()
-        ));
-    }
-
     static public void main(String[] args) {
         setup();
         trash();
@@ -63,12 +45,10 @@ public final class App {
     }
 
     static private void setup() {
-        try { if (System.getProperty(ZVA_LOG) != null) LOG = true; }
-        catch (Exception e) { e.printStackTrace(); }
-        try { if (System.getProperty(ZVA_LOOPBACK_TEST) != null) LOOPBACK_TEST = true; }
-        catch (Exception e) { e.printStackTrace(); }
-        try { if (System.getProperty(ZVA_FORMAT_TEST) != null) FORMAT_TEST = true; }
-        catch (Exception e) { e.printStackTrace(); }
+        LOG             = parseProperty(ZVA_LOG            , false);
+        FORMAT_TEST     = parseProperty(ZVA_FORMAT_TEST    , false);
+        LOOPBACK_TEST   = parseProperty(ZVA_LOOPBACK_TEST  , false);
+        LOOPBACK_PERIOD = parseProperty(ZVA_LOOPBACK_PERIOD, 5000, 500, 50000);
     }
 
     static private void trash() {
@@ -87,15 +67,15 @@ public final class App {
             return;
         int frameSize = dstFormat.getFrameSize();
         int toRead = frameSize * READ_FACTOR;
-        dst.addLineListener(event -> print("dst: " + event.toString()));
-        src.addLineListener(event -> print("src: " + event.toString()));
+        dst.addLineListener(event -> print("dst: " + event));
+        src.addLineListener(event -> print("src: " + event));
         try {
             dst.open(dstFormat);
             src.open(srcFormat);
             dst.start();
             src.start();
             long startTs = System.currentTimeMillis();
-            while (System.currentTimeMillis() - startTs < CHECK_PERIOD) {
+            while (System.currentTimeMillis() - startTs < LOOPBACK_PERIOD) {
                 byte[] readData = new byte[toRead];
                 boolean isRead = false;
                 int readCnt = dst.read(readData, 0, toRead);
@@ -120,14 +100,6 @@ public final class App {
             dst.close();
             src.close();
         }
-    }
-
-    static private void printChapter(String name) {
-        print("");
-        print("=======================================");
-        print("============ " + name);
-        print("=======================================");
-        print("");
     }
 
     static private void loopbackTest() {
@@ -294,6 +266,65 @@ public final class App {
         AudioInputStream dstStr = new AudioInputStream(dst);
         AudioInputStream srcStr = AudioSystem.getAudioInputStream(AudioFormat.Encoding.ULAW, dstStr);
         System.out.println("converted frameLength: " + srcStr.getFrameLength() + " format: " + srcStr.getFormat());
+    }
+
+    static private boolean parseProperty(String name, boolean defaultValue) {
+        try {
+            if (System.getProperty(name) == null)
+                return defaultValue;
+            else
+                return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    static private long parseProperty(String name, long defaultValue, long minValue, long maxValue) {
+        try {
+            String property = System.getProperty(name);
+            if (property == null) {
+                return defaultValue;
+            } else {
+                long value = Long.parseLong(property);
+                if (value < minValue)
+                    return minValue;
+                else if (value > maxValue)
+                    return maxValue;
+                else
+                    return value;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    static private void print(String format, Object... args) {
+        System.out.println(String.format(Locale.US, format, args));
+    }
+
+    static private void log(String format, Object... args) {
+        if (LOG) print(format, args);
+    }
+
+    static private void printChapter(String name) {
+        print("");
+        print("=======================================");
+        print("============ " + name);
+        print("=======================================");
+        print("");
+    }
+
+    static private void print(int num, Mixer.Info info) {
+        System.out.println(String.format(Locale.US,
+                "====== MIXER INFO num: %02d ====== \ndescr: <%s> \nname: <%s> \nvend: <%s> \nver: <%s>",
+                num,
+                info.getDescription(),
+                info.getName(),
+                info.getVendor(),
+                info.getVersion()
+        ));
     }
 
 }
