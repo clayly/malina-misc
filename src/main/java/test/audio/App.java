@@ -54,22 +54,6 @@ public final class App {
     }
 
     static public void main(String[] args) {
-        try {
-            System.out.println("\n========= ENVIRONMENT =========\n");
-            System.getenv().forEach((key, value) -> {
-                        try { print(key + ":" + value); }
-                        catch (Exception e) { e.printStackTrace(); }
-                    }
-            );
-            System.out.println("\n========= PROPERTY =========\n");
-            System.getProperties().forEach((key, value) -> {
-                        try { print(key + ":" + value); }
-                        catch (Exception e) { e.printStackTrace(); }
-                    }
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         setup();
         trash();
         if (FORMAT_TEST)
@@ -138,7 +122,16 @@ public final class App {
         }
     }
 
+    static private void printChapter(String name) {
+        print("");
+        print("=======================================");
+        print("============ " + name);
+        print("=======================================");
+        print("");
+    }
+
     static private void loopbackTest() {
+        printChapter("LOOPBACK TEST");
         Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
         for (int i = 0; i < mixerInfo.length; ++i) {
             Mixer.Info info = mixerInfo[i];
@@ -174,6 +167,7 @@ public final class App {
     }
 
     static private void formatTest() {
+        printChapter("FORMAT TEST");
         Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
         for (int i = 0; i < mixerInfo.length; ++i) {
             Mixer.Info info = mixerInfo[i];
