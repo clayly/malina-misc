@@ -9,10 +9,10 @@ import java.util.Locale;
 @SuppressWarnings({"ConstantConditions", "UnnecessaryLocalVariable", "SpellCheckingInspection", "SameParameterValue", "ManualMinMaxCalculation"})
 public final class App {
 
-    static private final String ZVA_LOG             = "ZVA_LOG";
-    static private final String ZVA_LOOPBACK_TEST   = "ZVA_LOOPBACK_TEST";
-    static private final String ZVA_LOOPBACK_PERIOD = "ZVA_LOOPBACK_PERIOD";
-    static private final String ZVA_FORMAT_TEST     = "ZVA_FORMAT_TEST";
+    static private final String PROPERTY_LOG             = "LOG";
+    static private final String PROPERTY_LOOPBACK_TEST   = "LOOPBACK_TEST";
+    static private final String PROPERTY_LOOPBACK_PERIOD = "LOOPBACK_PERIOD";
+    static private final String PROPERTY_FORMAT_TEST     = "FORMAT_TEST";
 
     static private boolean LOG             = false;
     static private boolean LOOPBACK_TEST   = false;
@@ -45,10 +45,10 @@ public final class App {
     }
 
     static private void setup() {
-        LOG             = parseProperty(ZVA_LOG            , false);
-        FORMAT_TEST     = parseProperty(ZVA_FORMAT_TEST    , false);
-        LOOPBACK_TEST   = parseProperty(ZVA_LOOPBACK_TEST  , false);
-        LOOPBACK_PERIOD = parseProperty(ZVA_LOOPBACK_PERIOD, 5000, 500, 50000);
+        LOG             = parseProperty(PROPERTY_LOG            , false);
+        FORMAT_TEST     = parseProperty(PROPERTY_FORMAT_TEST    , false);
+        LOOPBACK_TEST   = parseProperty(PROPERTY_LOOPBACK_TEST  , false);
+        LOOPBACK_PERIOD = parseProperty(PROPERTY_LOOPBACK_PERIOD, 5000, 500, 50000);
     }
 
     static private void trash() {
