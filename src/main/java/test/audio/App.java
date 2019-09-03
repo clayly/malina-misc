@@ -45,10 +45,17 @@ public final class App {
     }
 
     static private void setup() {
+        print("====== SETUP ======");
         LOG             = parseProperty(PROPERTY_LOG            , false);
         FORMAT_TEST     = parseProperty(PROPERTY_FORMAT_TEST    , false);
         LOOPBACK_TEST   = parseProperty(PROPERTY_LOOPBACK_TEST  , false);
         LOOPBACK_PERIOD = parseProperty(PROPERTY_LOOPBACK_PERIOD, 5000, 500, 50000);
+        print("%s:%b\n %s:%b\n %s:b\n %s:%d\n",
+                PROPERTY_LOG, LOG,
+                PROPERTY_FORMAT_TEST, FORMAT_TEST,
+                PROPERTY_LOOPBACK_TEST, LOOPBACK_TEST,
+                PROPERTY_LOOPBACK_PERIOD, LOOPBACK_PERIOD
+        );
     }
 
     static private void trash() {
